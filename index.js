@@ -1,6 +1,6 @@
 const express = require( 'express');
 const cors = require( 'cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -22,12 +22,39 @@ async function run(){
 
 
         const categoriesCollection = client.db('microTech').collection('categories');
-
+        const productsCollection = client.db('microTech').collection('products');
+       
         app.get('/categories',async(req,res) =>{
             const query={};
             const result = await categoriesCollection.find(query).toArray();
             res.send(result);
         })
+        app.get('/categories/:id',async(req,res) =>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await categoriesCollection.findOne(query);
+            res.send(result);
+        })
+        app.get('/products',async(req,res) =>{
+            console.log(req.query.categoryName);
+            let query = {};
+           if(req.query.categoryName)
+           {
+               query = {
+                  categoryName: req.query.categoryName
+               }
+           }
+            const cursor = productsCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+        app.get('/products/:id',async(req,res) =>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await productsCollection.findOne(query);
+            res.send(result);
+        })
+        
       
     }
     finally{
