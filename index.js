@@ -64,6 +64,7 @@ async function run(){
             const result = await categoriesCollection.find(query).toArray();
             res.send(result);
         })
+      
         app.get('/categories/:id',async(req,res) =>{
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
@@ -77,11 +78,41 @@ async function run(){
            {
                query = {
                   categoryName: req.query.categoryName
+                  
+                 
                }
            }
             const cursor = productsCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
+        });
+        app.get('/products/seller',async(req,res) =>{
+            console.log(req.query.categoryName);
+            let query = {};
+           if(req.query.email)
+           {
+               query = {
+                  email: req.query.email
+                  
+                 
+               }
+           }
+            const cursor = productsCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+        app.delete('/products/seller/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
+        })
+        app.post('/products', async (req,res) =>{
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result);
+
+        
         });
         app.get('/products/:id',async(req,res) =>{
             const id = req.params.id;
@@ -136,6 +167,7 @@ async function run(){
             const user = await usersCollection.findOne(query);
             res.send({ isAdmin: user?.role === 'admin' });
           })
+        
 
 
         app.post('/users', async (req, res) => {
