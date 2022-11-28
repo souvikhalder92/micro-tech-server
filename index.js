@@ -180,7 +180,7 @@ async function run(){
             const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
             res.send(result);
         })
-        app
+        
         app.post('/jwt', (req,res) =>{
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET ,{expiresIn: '30d'})
@@ -200,6 +200,7 @@ async function run(){
         
         app.get('/users', async (req, res) => {
             const query = {};
+          
             const users = await usersCollection.find(query).toArray();
             res.send(users);
         });
@@ -209,6 +210,21 @@ async function run(){
             const user = await usersCollection.findOne(query);
             res.send({ isAdmin: user?.role === 'admin' });
           })
+          app.get('/users/sellers', async (req, res) => {
+            const email = req.query.email;
+            let query = {};
+            if(email)
+            {
+                query = {
+                    email
+                }
+            }
+            const seller = await usersCollection.findOne(query);
+            res.send(seller);
+          })
+       
+
+
         
 
 
@@ -239,6 +255,68 @@ async function run(){
             const result = await usersCollection.deleteOne(query);
             res.send(result);
         });
+        //admin get, seller data, get , update , delete
+    app.get("/users/seller", async (req, res) => {
+        const Status = req.query.status;
+        let query = {};
+        if (Status) {
+          query = { status: Status };
+        }
+  
+        const seller = await usersCollection.find(query).toArray();
+  
+        res.send(seller);
+      });
+  
+      app.patch("/users/seller/:id", verifyJWT, async (req, res) => {
+        const id = req.params.id;
+        // console.log(id);
+        const verify = req.body.verify;
+        const query = { _id: ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            verify: verify,
+          },
+        };
+  
+        const seller = await usersCollection.updateOne(query, updatedDoc);
+  
+        res.send(seller);
+      });
+      app.delete(
+        "/users/seller/:id",
+        verifyJWT,
+  
+        async (req, res) => {
+          const id = req.params.id;
+          const query = { _id: ObjectId(id) };
+          const result = await usersCollection.deleteOne(query);
+          res.send(result);
+        }
+      );
+  
+      //all user update and delete
+      app.patch("/users/:id", verifyJWT, async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const verify = req.body.verify;
+        const query = { _id: ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            verify: verify,
+          },
+        };
+  
+        const user = await usersCollection.updateOne(query, updatedDoc);
+        // console.log(seller);
+        res.send(user);
+      });
+      app.delete("/users/:id", verifyJWT, async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await usersCollection.deleteOne(query);
+        res.send(result);
+      });
      
         
       
